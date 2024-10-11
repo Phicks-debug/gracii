@@ -6,19 +6,27 @@ body {
   @apply bg-dark-gray text-white;
 }
 
+/* styles.css or index.css */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 8px;
+  /* Width of the scrollbar */
 }
 
 ::-webkit-scrollbar-track {
-  background: #141414;
+  background: #f1f1f1;
+  /* Background of the scrollbar track */
+  border-radius: 10px;
+  /* Rounded corners for the track */
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #2a2a2a;
-  border-radius: 5px;
+  background: #888;
+  /* Color of the scrollbar thumb */
+  border-radius: 10px;
+  /* Rounded corners for the thumb */
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3a3a3a;
+  background: #555;
+  /* Darker thumb color on hover */
 }

@@ -214,7 +214,7 @@ class Claude(ChatLLM):
         """
 
         # Invoke model through bedrock runtime service
-        invoke_result = self._invoke_chat_model(self.modelId, 
+        return self._invoke_chat_model(self.modelId, 
             self.__build_claude_payload, 
             payload_params=[messages, 
                             system_prompt, 
