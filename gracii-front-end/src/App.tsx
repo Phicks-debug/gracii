@@ -295,7 +295,7 @@ function App() {
         {children}
       </h5>
     ),
-    h6: ({ node, children, ...props }) => (
+    h6: ({ node, children, ...props }: { node: any, children: any }) => (
       <h6 
         className="text-sm font-medium mb-0 mt-1 text-gray-600"
         {...props}
