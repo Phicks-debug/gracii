@@ -16,6 +16,15 @@ export default {
           700: '#1d4ed8',
         },
       },
+      spacing: {
+        '1%': '1%',
+        '2%': '2%',
+        '3%': '3%',
+        '4%': '4%',
+        '10%': '10%',
+        '20.5%': '20.5%',
+        // Add more percentage values as needed
+      },
     },
   },
   plugins: [

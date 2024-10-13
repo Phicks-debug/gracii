@@ -1,2 +1,12 @@
 fastapi
 uvicorn
+boto3
+pytz
+geocoder
+geopy
+termcolor
+psutil
+wikipedia
+python-multipart
+scrapy
+beautifulsoup4

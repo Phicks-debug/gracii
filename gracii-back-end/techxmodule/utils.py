@@ -5,7 +5,6 @@ import pytz
 import platform,socket,re,uuid,json,psutil,logging # type: ignore
 from datetime import datetime
 import geocoder, geopy      # type: ignore
-
 from termcolor import cprint # type: ignore
     
     
@@ -99,3 +98,28 @@ def location():
 
 def real_time():
     return datetime.now(tz = pytz.timezone("Asia/Bangkok")).strftime('%Y-%m-%d %H:%M:%S %Z')
+
+
+
+def json_to_xml(json_obj):
+    def parse_value(key, value):
+        """Helper function to handle different types of values"""
+        if isinstance(value, dict):  # If value is a dictionary, recursively convert it
+            return f"<{key}>{dict_to_xml(value)}</{key}>"
+        elif isinstance(value, list):  # If value is a list, process each item and wrap in the key
+            return f"<{key}>" + "".join([parse_value(key[:-1] if key.endswith('s') else key, item) for item in value]) + f"</{key}>"
+        else:  # For other data types, simply wrap the value in XML tags
+            return f"<{key}>{value}</{key}>"
+    
+    def dict_to_xml(d):
+        """Recursive function to convert dictionary to XML format"""
+        xml = ""
+        for key, value in d.items():
+            xml += parse_value(key, value)
+        return xml
+
+    # If the input is a JSON string, parse it first
+    if isinstance(json_obj, str):
+        json_obj = json.loads(json_obj)
+
+    return dict_to_xml(json_obj)

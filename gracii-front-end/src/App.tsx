@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
-import { Send, Paperclip } from 'lucide-react'
+import { Send, Paperclip} from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm' // Import GFM (GitHub Flavored Markdown)
+import axios from "axios";
 
 interface Message {
   id: number
@@ -15,10 +16,16 @@ function App() {
   const [isStreaming, setIsStreaming] = useState(false)
   const [hasInteracted, setHasInteracted] = useState(false)
   const [showHeader, setShowHeader] = useState(false)
+  const [showSidePanel, setShowSidePanel] = useState(true)
+  const [greeting, setGreeting] = useState('')
+  const [animationComplete, setAnimationComplete] = useState(false)
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [preview, setPreview] = useState(null);
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const chatContainerRef = useRef<HTMLDivElement>(null)
+  const sidePanelRef = useRef<HTMLDivElement>(null)
   const lastScrollTop = useRef(0)
   const isScrollingRef = useRef(false)
 
@@ -31,6 +38,46 @@ function App() {
   }, [])
 
   useEffect(() => {
+    const text = "Gracii here, what's up?"
+    let i = 0
+
+    const startTypingEffect = () => {
+      const typingEffect = setInterval(() => {
+        if (i < text.length) {
+          setGreeting((prev) => prev + text.charAt(i))
+          i++
+        } else {
+          clearInterval(typingEffect)
+          setAnimationComplete(true)
+        }
+      }, 50)
+
+      return () => clearInterval(typingEffect)
+    }
+
+    // Add a 1-second delay before starting the animation
+    const delay = setTimeout(startTypingEffect, 1000)
+
+    return () => {
+      clearTimeout(delay)
+    }
+  }, [])
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (e.clientX <= 10) {
+        setShowSidePanel(true)
+      } else if (sidePanelRef.current && !sidePanelRef.current.contains(e.target as Node)) {
+        setShowSidePanel(false)
+      }
+    }
+
+    document.addEventListener('mousemove', handleMouseMove)
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove)
+    }
+  }, [])
+  useEffect(() => {
     if (messages.length > 0 && messages[messages.length - 1].sender === 'bot') {
       scrollToBottom()
     }
@@ -42,9 +89,11 @@ function App() {
       textareaRef.current.style.height = `${newHeight}px`
     }
   }, [input])
+    
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (input.trim()) {
       setHasInteracted(true);
       const userMessage: Message = { id: Date.now(), text: input, sender: 'user' };
@@ -110,6 +159,8 @@ function App() {
     const file = e.target.files?.[0]
     if (file) {
       console.log('File selected:', file.name)
+      setSelectedFile(file);
+      setPreview(URL.createObjectURL(file)); // Preview the imag
     }
   }
 
@@ -169,7 +220,7 @@ function App() {
       return isCodeBlock ? (
         <span className="text-blue-300" {...props}>{children}</span>
       ) : (
-        <a href={href} className="text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer" {...props}>
+        <a href={href} className="text-blue-500 hover:underline font-medium" target="_blank" rel="noopener noreferrer" {...props}>
           {children}
         </a>
       )
@@ -179,7 +230,12 @@ function App() {
       return isWithinCodeBlock ? (
         <span className="block mb-2" {...props}>{children}</span>
       ) : (
-        <p {...props}>{children}</p>
+          <p className="p-0 m-0 mb-4 font-normal"
+              style={{ 
+                fontFamily: "'Afacad Flux', sans-serif",
+                lineHeight: '1.6',
+              }}
+            {...props}>{children}</p>
       )
     },
     pre({ node, children, ...props }: { node: any, children: any }) {
@@ -188,11 +244,84 @@ function App() {
           {children}
         </div>
       )
-    }
+    },
+    li({ node, children, ...props }: { node: any, children: any }) {
+      return (
+        <li
+          className="mb-1 mt-0 p-0 font-normal" // Added margin bottom to list items
+          {...props}
+        >
+          {children}
+        </li>
+      )
+    },
+    h1: ({ node, children, ...props }: { node: any, children: any }) => (
+      <h1 
+        className="text-2xl font-bold mb-4 mt-6 text-gray-800 pb-1"
+        {...props}
+      >
+        {children}
+      </h1>
+    ),
+    h2: ({ node, children, ...props }: { node: any, children: any }) => (
+      <h2 
+        className="text-xl font-semibold mb-2 mt-5 text-gray-700"
+        {...props}
+      >
+        {children}
+      </h2>
+    ),
+    h3: ({ node, children, ...props }: { node: any, children: any }) => (
+      <h3 
+        className="text-base font-medium mb-1 mt-4 text-gray-600"
+        {...props}
+      >
+        {children}
+      </h3>
+    ),
+    h4: ({ node, children, ...props }: { node: any, children: any }) => (
+      <h4 
+        className="text-sm font-medium mb-1 mt-3 text-gray-600"
+        {...props}
+      >
+        {children}
+      </h4>
+    ),
+    h5: ({ node, children, ...props }: { node: any, children: any }) => (
+      <h5 
+        className="text-sm font-medium mb-0 mt-2 text-gray-600"
+        {...props}
+      >
+        {children}
+      </h5>
+    ),
+    h6: ({ node, children, ...props }) => (
+      <h6 
+        className="text-sm font-medium mb-0 mt-1 text-gray-600"
+        {...props}
+      >
+        {children}
+      </h6>
+    ),
   }
 
   return (
     <div className="flex flex-col h-screen bg-gray-100 text-gray-800">
+
+      {/* Side Panel */}
+      <div 
+        ref={sidePanelRef}
+        className={`fixed top-0 left-0 h-full bg-gray-200 transition-all duration-300 ease-in-out ${
+          showSidePanel ? 'w-64' : 'w-0'
+        } overflow-hidden z-50`}
+      >
+        <div className="p-4">
+          <h2 className="text-xl font-bold mb-4 text-gray-800">Chat History</h2>
+          {/* Add your chat history list here */}
+        </div>
+      </div>
+
+      {/* Header */}
       <header 
         className={`z-30 fixed top-0 left-0 right-0 bg-gradient-to-b from-gray-300 to-transparent p-4 text-center transition-all duration-300 ${
           showHeader && hasInteracted ? 'translate-y-0' : '-translate-y-full'
@@ -200,18 +329,47 @@ function App() {
       >
         <h1 className="text-2xl font-bold">Gracii</h1>
       </header>
+      
+      {/* Showing Chat Interactive*/}
       <main className={`flex-1 overflow-hidden flex flex-col transition-all duration-300 ${showHeader ? 'pt-16' : 'pt-0'}`}>
         <div 
           ref={chatContainerRef}
           className="flex-1 overflow-auto scrollbar-hide scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 relative"
           onScroll={handleScroll}
         >
+
+          {/* Greeting */}
+          {!hasInteracted && (
+            <div className="flex items-center justify-center">
+              <style>
+                {`
+                  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap');
+                `}
+              </style>
+              <div className="absolute top-3/4 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                <h1 
+                  className="text-6xl font-light text-gray-700"
+                  style={{ 
+                    fontFamily: "'Poppins', sans-serif",
+                    opacity: animationComplete ? 1 : 0.7,
+                    transition: 'opacity 0.5s ease-in-out'
+                  }}
+                >
+                  {animationComplete ? "Gracii here, what's up?" : greeting}
+                </h1>
+              </div>
+            </div>
+          )}
+
+          {/* Overlay message fade */}
           <div className="fixed top-0 left-0 right-0 bottom-0 pointer-events-none z-20">
             <div 
               className="bg-gradient-to-b from-gray-100 via-transparent to-transparent"
               style={{ height: `${overlayHeight}px` }} // Use the overlayHeight state here
             ></div>
           </div>
+
+          {/* Chat messages */}
           <div className="max-w-2xl mx-auto pb-24 relative z-10">
             {messages.map((message) => (
               <div
@@ -228,7 +386,7 @@ function App() {
                   )}
                   <div className={`p-3 rounded-lg ${message.sender === 'user' ? 'bg-gray-300 max-w-md shadow' : 'bg-gray-100 max-w-full'} `}>
                     <ReactMarkdown
-                      className="prose max-w-full"
+                      className="prose max-w-full space-y-4"
                       remarkPlugins={[remarkGfm]}
                       components={customComponents}
                     >
@@ -241,13 +399,15 @@ function App() {
             <div ref={messagesEndRef} />
           </div>
         </div>
-        <div className={`bg-gray-100 transition-all duration-300 ease-in-out ${hasInteracted ? '' : 'mb-72'} relative z-30`}>
+
+        {/* Chat Input */}
+        <div className={`bg-gray-100 transition-all duration-300 ease-in-out ${hasInteracted ? '' : 'mb-20.5%'} relative z-30`}>
           <form onSubmit={handleSubmit} className="max-w-2xl mx-auto">
             <div className="relative flex items-center bg-white rounded-3xl shadow-md">
               <button 
                 type="button"
                 onClick={handleAttachment}
-                className="p-3 text-gray-500 hover:text-gray-700 focus:outline-none"
+                className="shrink-0 p-4 text-gray-500 hover:text-gray-700 focus:outline-none"
               >
                 <Paperclip className="w-5 h-5" />
               </button>
@@ -257,14 +417,26 @@ function App() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Type your message..."
-                className="flex-grow p-3 bg-transparent text-gray-800 focus:outline-none resize-none"
+                className="w-full p-0 bg-transparent text-gray-800 focus:outline-none resize-none"
                 disabled={isStreaming}
                 rows={1}
                 style={{ maxHeight: '150px', overflowY: 'auto' }}
               />
+
+              {/* Preview */}
+              {preview && (
+                <div className="mb-4 flex justify-center">
+                  <img 
+                    src={preview} 
+                    alt="Preview" 
+                    className="max-w-[80px] max-h-[80px] rounded-lg object-contain" 
+                  />
+                </div>
+              )}
+
               <button 
                 type="submit" 
-                className="p-3 text-gray-500 hover:text-gray-700 focus:outline-none"
+                className="shrink-0 p-4 text-gray-500 hover:text-gray-700 focus:outline-none"
                 disabled={isStreaming}
               >
                 <Send className="w-5 h-5" />
@@ -276,6 +448,8 @@ function App() {
           </div>
         </div>
       </main>
+
+      {/* File Hander */}
       <input
         type="file"
         ref={fileInputRef}

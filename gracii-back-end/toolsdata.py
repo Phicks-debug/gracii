@@ -1,42 +1,77 @@
-functionB = {
-    "name": "link_to_knowledgebase",
-    "description": "A datasource that store every things about Chí Phèo story by Nam Cao. Use this to search more about the story,\
-        the characters name Bá Kiến, Thị Nở, Tự Lãng, Chí Phèo, or other small characters in the story. \
-            Use this to know more and to analysis when asking about the story and the characters.",
-    "input_schema": {
-        "type": "object",
-        "properties": {
-            "query": {
-                "type": "string",
-                "description": "The texts or keywords that you want to search for the reference  or for more information about it. \
-                    This should be a pargraphs, a lot of string that you want to find more context,or a text that can help \
-                        you understand more about the story, the characters ",
-            }
-        },
-        "required": ["query"],
-    },
-}
-
-
-functionC = {
-    "name": "get_article",
-    "description": "A tool to retrieve an up to date Wikipedia article. \
-                    Use side by side with get_information tool for comparing and evaluation informations",
+browsing_web = {
+    "name": "browsing_web",
+    "description": "Function to retrieve, browsing links and topics from internet browser",
     "input_schema": {
         "type": "object",
         "properties": {
             "search_term": {
                 "type": "string",
-                "description": "The search term to find a wikipedia article by title",
-            },
+                "description": "The keyword or term that you want to search for"
+            }
         },
-        "required": ["search_term"],
-    },
+        "required": ["search_term"]
+    }
 }
+
+
+browsing_map = {
+    "name": "browsing_map",
+    "description": """
+        Function to get location or search for facilities around the areas.
+    """,
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "search_term": {
+                "type": "string",
+                "description": "The keyword or term of type of the facility that you want to search for. For example: 'shop', 'gas', etc..."
+            },
+            "place": {
+                "type": "string",
+                "description": "The place, location that you want to search around it. If this parameter is set, the other parameters are not used. Defaults to None."
+            },
+            "street": {
+                "type": "string",
+                "description": "House number/street. Defaults to None."
+            },
+            "city": {
+                "type": "string",
+                "description": "City of search. Defaults to None."
+            },
+            "country": {
+                "type": "string",
+                "description": "country of search. Defaults to None."
+            },
+            "radius": {
+                "type": "integer",
+                "description": "Expand the search square by the distance in kilometers. Defaults to 5."
+            }
+        },
+        "required": ["search_term"]
+    }
+}
+
+
+scrape_webpage = {
+    "name": "scrape_webpage",
+    "description": "Function access into the webpage an scarpe all the available informations from the body of the webpage.",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "url": {
+                "type": "string",
+                "description": "The url link of the webpage that you want to srape the information"
+            }
+        },
+        "required": ["search_term"]
+    }
+}
+
 
 
 def return_tool():
     return [
-        functionB,
-        functionC
+        browsing_web,
+        browsing_map,
+        scrape_webpage
     ]
