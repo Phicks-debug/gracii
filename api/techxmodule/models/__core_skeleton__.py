@@ -2,7 +2,7 @@ import json
 
 from typing import List, Any, Dict, Callable
 from techxmodule.messages import ChatMessage
-from termcolor import cprint    # type: ignore
+from termcolor import cprint
 
 
 class LLM():

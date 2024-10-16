@@ -1,6 +1,6 @@
 import json
 
-from termcolor import cprint, colored    # type: ignore
+from termcolor import cprint, colored
 from typing import List, Optional, Any, Dict, Callable
 from techxmodule.models.__core_skeleton__ import LLM
 

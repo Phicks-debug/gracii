@@ -1,0 +1,4 @@
+.env
+__pycache__
+techxmodule/__pycache__
+techxmodule/models/__pycache__

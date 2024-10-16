@@ -10,8 +10,6 @@ from scrapy.signalmanager import dispatcher
 from bs4 import BeautifulSoup
 import re
 
-import boto3, json
-
 
 @Tools.tool("retrieve", "data")
 def browsing_web(search_term):

@@ -1,7 +1,7 @@
 import tools, json
 import xml.etree.ElementTree as ET
 
-from termcolor import cprint, colored    # type: ignore
+from termcolor import cprint
 from typing import List, Optional, Any, Dict, Callable
 from functools import wraps
 from techxmodule import utils
@@ -334,7 +334,7 @@ class Claude(ChatLLM):
 
     def __process_streaming_claude_response(
             self, model_response: Any, 
-            debug: bool = False) -> Dict[str, Any]:
+            debug: bool = False) -> Any:
         """
         Stream and print model output in real-time.
 
